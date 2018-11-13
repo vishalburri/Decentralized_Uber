@@ -36,13 +36,14 @@ App = {
       // Restart Chrome if you are unable to receive this event
       // This is a known issue with Metamask
       // https://github.com/MetaMask/metamask-extension/issues/2393
-        // instance.CabBooked({}, {
-        //   fromBlock: 0,
-        //   toBlock: 'latest'
-        // }).watch(function(error, event) {
-        //   console.log("event triggered", event)
-        //   // Reload when a cab is booked
-        // });
+        instance.CabBooked({}, {
+          fromBlock: 0,
+          toBlock: 'latest'
+        }).watch(function(error, event) {
+          console.log("event triggered", event)
+          App.render();
+          // Reload when a cab is booked
+        });
 
         instance.TripEnded({}, {
           fromBlock: 0,
@@ -84,7 +85,13 @@ App = {
       ridedetails.empty();
       if(ispaid==false){
         loader.hide();
+        var payDetails = await uberInstance.getCustomerDetails({from:App.account});
+        var fare = await uberInstance.getDriverFare({from:payDetails[0]});
         ridedetails.empty();
+        ridedetails.append("<h3 class='text-center'>PAYMENT DETAILS</h3><hr/>");
+        ridedetails.append("<center><div class='well well-sm'><h4>To : "+payDetails[0]+"</h4></div></center>");
+        ridedetails.append("<center><div class='well well-sm'><h4>Distance Travelled : "+(payDetails[1]/fare.toNumber())+" km</h4></div></center>");
+        ridedetails.append("<center><div class='well well-sm'><h4>Amount : "+payDetails[1]+" wei</h4></div></center>");
         ridedetails.append("<center><button type='button' class='btn btn-success' onclick='App.payDriver();'>Pay</button></center>");      
         ridedetails.show();
       }
@@ -92,9 +99,10 @@ App = {
         loader.hide();
         var driverDetails = await uberInstance.getDriverDetails(isBooked.toNumber(),{from:App.account});
         ridedetails.empty();
+        ridedetails.append("<h3 class='text-center'>CAB BOOKED</h3><hr/>");
         ridedetails.append("<center><div class='well well-sm'><h4>Driver Name : "+driverDetails[0]+"</h4></div></center>");
         ridedetails.append("<center><div class='well well-sm'><h4>Contact No : "+driverDetails[2]+"</h4></div></center>");
-        ridedetails.append("<center><div class='well well-sm'><h4>Amount to Pay : "+driverDetails[1]*8+" wei</h4></div></center>");
+        ridedetails.append("<center><div class='well well-sm'><h4>Fareperkm : "+driverDetails[1]+" wei</h4></div></center>");
         ridedetails.append("<center><div class='well well-sm'><h4>Estimated Arrival : 30 min</h4></div></center>");
         ridedetails.show();
         // ridedetails.empty();

@@ -30,6 +30,7 @@ contract Uber {
   event Collected(address sender,uint amount);
   event CabBooked(address sender);
   event RequestSent(address sender);
+  event RequestCancel(address sender);
   event TripEnded(address sender);
 
 
@@ -142,6 +143,7 @@ contract Uber {
     driverList[id].status = 1;
     customer[msg.sender].isBusy = false;
     reqList[id] = address(0);
+    emit RequestCancel(msg.sender);
   }
   
   //Called by driver
@@ -246,6 +248,13 @@ contract Uber {
      else
      return false; 
   }
+
+  function getDriverFare () public view returns(uint res)  {
+    require (driverList[mapDriver[msg.sender]].valid,"Not a valid address");
+    
+    return driverList[mapDriver[msg.sender]].farePerKm; 
+  }
+  
   
   
 

@@ -46,6 +46,16 @@ App = {
         // Reload when a request is sent
         App.render();
       });
+
+      instance.RequestCancel({}, {
+        fromBlock: 0,
+        toBlock: 'latest'
+      }).watch(function(error, event) {
+        console.log("event triggered", event)
+        // Reload when a request is cancelled by user
+        App.render();
+      });
+
     });
   },
   render: async function() {
@@ -147,7 +157,8 @@ App = {
     var reqDetails = $("#requestdetails");
     var uberInstance = await App.contracts.Uber.deployed();
     try{
-    var cost = document.getElementById('kms').value*5;  
+    var fare = await uberInstance.getDriverFare({from:App.account});
+    var cost = document.getElementById('kms').value*(fare.toNumber());  
     console.log(cost);
     await uberInstance.endTrip(cost,{from:App.account});
     reqDetails.empty();
